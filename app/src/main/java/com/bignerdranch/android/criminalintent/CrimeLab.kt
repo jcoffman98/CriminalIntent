@@ -20,10 +20,6 @@ object CrimeLab {
     }
 
     fun getCrime(id: UUID): Crime? {
-        for (crime in mCrimes) {
-            if(crime.mId == id)
-                return crime
-        }
-        return null
+        return mCrimes.find { c: Crime -> c.mId == id}
     }
 }

@@ -1,24 +1,31 @@
 package com.bignerdranch.android.criminalintent
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.text.Layout
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import org.w3c.dom.Text
+import java.util.*
 
 /**
  * Created by jcoffman on 3/21/18.
  */
 class CrimeListFragment : Fragment() {
     private lateinit var mCrimeRecyclerView: RecyclerView
-    private lateinit var mAdapter: CrimeAdapter
+    private var mAdapter : CrimeAdapter? = null
+    private var mSelected  = 0
+
+    override fun onResume() {
+        super.onResume()
+        updateUI()
+    }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater?.inflate(R.layout.fragment_crime_list, container, false)
@@ -30,24 +37,42 @@ class CrimeListFragment : Fragment() {
 
     private fun updateUI(): Unit {
         val crimes = CrimeLab.getCrimes()
+
+        if(mAdapter == null) {
+            mAdapter = CrimeAdapter(crimes)
+            mCrimeRecyclerView.adapter = mAdapter
+        } else {
+            //mAdapter!!.notifyDataSetChanged()
+            Log.v("LOGGER", "Position $mSelected")
+            mAdapter!!.notifyItemChanged(mSelected)
+        }
         Log.v("TAGGER", "${crimes.size}")
-        mAdapter = CrimeAdapter(crimes)
-        mCrimeRecyclerView.adapter = mAdapter
     }
 
     private inner class CrimeHolder(inflator: LayoutInflater, parent: ViewGroup) : RecyclerView.ViewHolder(inflator.inflate(R.layout.list_item_crime, parent, false)), View.OnClickListener {
-        override fun onClick(v: View?) {
-            Toast.makeText(activity, mCrime.mTitle + " clicked!", Toast.LENGTH_SHORT).show()
-        }
-
         private var mTitleTextView: TextView = itemView.findViewById(R.id.crime_title) as TextView
         private var mDateTextView: TextView = itemView.findViewById(R.id.crime_date) as TextView
+        private  var mSolvedImageView: ImageView = itemView.findViewById(R.id.crime_solved) as ImageView
         private lateinit var mCrime: Crime
+
+        init {
+            itemView.setOnClickListener(this)
+        }
+
+        override fun onClick(v: View?) {
+            mSelected = adapterPosition
+            val intent = CrimeActivity.newIntent(activity, mCrime.mId)
+            startActivity(intent)
+        }
 
         fun bind(crime: Crime) : Unit {
             mCrime = crime
             mTitleTextView.setText(mCrime.mTitle)
-            mDateTextView.setText(mCrime.mDate.toString())
+            mDateTextView.text = java.text.SimpleDateFormat("EEE, MMM d, YYYY").format(mCrime.mDate)
+            mSolvedImageView.visibility = when(crime.isSolved) {
+                false -> View.GONE
+                true -> View.VISIBLE
+            }
             Log.v("BINDER", "${mCrime.mTitle}, ${mCrime.mDate}")
         }
     }
@@ -65,6 +90,8 @@ class CrimeListFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: CrimeHolder?, position: Int) {
+            val h = holder as RecyclerView.ViewHolder
+            Log.v("POSITION", "Item at ${holder?.adapterPosition}")
             val crime = mCrimes[position]
             holder?.bind(crime)
         }
