@@ -35,6 +35,7 @@ class CrimeListFragment : Fragment() {
         return v
     }
 
+
     private fun updateUI(): Unit {
         val crimes = CrimeLab.getCrimes()
 
@@ -61,7 +62,7 @@ class CrimeListFragment : Fragment() {
 
         override fun onClick(v: View?) {
             mSelected = adapterPosition
-            val intent = CrimeActivity.newIntent(activity, mCrime.mId)
+            val intent = CrimePagerActivity.newIntent(activity, mCrime.mId) as Intent
             startActivity(intent)
         }
 
