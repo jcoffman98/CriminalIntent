@@ -62,7 +62,8 @@ class CrimeListFragment : Fragment() {
 
         override fun onClick(v: View?) {
             mSelected = adapterPosition
-            val intent = CrimePagerActivity.newIntent(activity, mCrime.mId) as Intent
+            Log.v("HOLDER", "crime id = ${mCrime.mId}")
+            val intent = CrimePagerActivity.newIntent(activity, mCrime.mId)
             startActivity(intent)
         }
 

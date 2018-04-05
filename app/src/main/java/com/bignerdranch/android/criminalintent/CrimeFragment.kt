@@ -19,7 +19,7 @@ class CrimeFragment : Fragment() {
     private lateinit var mCrime: Crime
     private lateinit var mTitleField: EditText
     private lateinit var mSolvedCheckBox: CheckBox
-    private lateinit var mDetailsButton: Button
+    private lateinit var mDateButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +46,14 @@ class CrimeFragment : Fragment() {
             }
         })
 
-        mDetailsButton = v?.findViewById(R.id.crime_date) as Button
-        mDetailsButton.text = mCrime.mDate.toString()
+        mDateButton = v?.findViewById(R.id.crime_date) as Button
+        mDateButton.text = mCrime.mDate.toString()
+        mDateButton.setOnClickListener( object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                val dialog = DatePickerFragment()
+                dialog.show(fragmentManager, DIALOG_DATE)
+            }
+        })
 
         mSolvedCheckBox = v.findViewById(R.id.crime_solved) as CheckBox
         mSolvedCheckBox.isChecked = mCrime.isSolved
@@ -57,6 +63,7 @@ class CrimeFragment : Fragment() {
 
     companion object {
         private val ARG_CRIME_ID: String = "crime_id"
+        private val DIALOG_DATE: String = "DialogDate"
 
         fun newInstance(crimeId: UUID) : CrimeFragment {
             val args = Bundle()
