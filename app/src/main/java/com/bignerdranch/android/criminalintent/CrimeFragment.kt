@@ -1,5 +1,7 @@
 package com.bignerdranch.android.criminalintent
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -24,7 +26,7 @@ class CrimeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val crimeId = arguments.getSerializable(ARG_CRIME_ID) as UUID
-        mCrime = CrimeLab.getCrime(crimeId)!!
+        mCrime = CrimeLab.getInstance(context).getCrime(crimeId)!!
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -34,7 +36,7 @@ class CrimeFragment : Fragment() {
         mTitleField.setText(mCrime.mTitle)
         mTitleField.addTextChangedListener( object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+              return
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -42,15 +44,16 @@ class CrimeFragment : Fragment() {
             }
 
             override fun afterTextChanged(p0: Editable?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                return
             }
         })
 
         mDateButton = v?.findViewById(R.id.crime_date) as Button
-        mDateButton.text = mCrime.mDate.toString()
+        updateDate()
         mDateButton.setOnClickListener( object : View.OnClickListener {
             override fun onClick(v: View?) {
-                val dialog = DatePickerFragment()
+                val dialog = DatePickerFragment.newInstance(mCrime.mDate)
+                dialog.setTargetFragment(this@CrimeFragment, REQUEST_DATE)
                 dialog.show(fragmentManager, DIALOG_DATE)
             }
         })
@@ -61,9 +64,29 @@ class CrimeFragment : Fragment() {
         return v
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode != Activity.RESULT_OK)
+            return
+
+        if(requestCode == REQUEST_DATE) {
+            val date = data?.getSerializableExtra(DatePickerFragment.EXTRA_DATE) as Date
+            mCrime.mDate = date
+            updateDate()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        CrimeLab.getInstance(activity).updateCrime(mCrime)
+    }
+    private fun updateDate() {
+        mDateButton.text = mCrime.mDate.toString()
+    }
+
     companion object {
-        private val ARG_CRIME_ID: String = "crime_id"
-        private val DIALOG_DATE: String = "DialogDate"
+        private const val ARG_CRIME_ID = "crime_id"
+        private const val DIALOG_DATE = "DialogDate"
+        private const  val REQUEST_DATE = 0
 
         fun newInstance(crimeId: UUID) : CrimeFragment {
             val args = Bundle()

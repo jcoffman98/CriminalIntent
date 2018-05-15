@@ -26,7 +26,7 @@ class CrimePagerActivity : AppCompatActivity() {
 
         Log.v("CRIME PAGER", "crime id = $crimeId")
 
-        mCrimes = CrimeLab.getCrimes()
+        mCrimes = CrimeLab.getInstance(applicationContext).getCrimes()
 
         mViewPager = findViewById(R.id.crime_view_pager) as ViewPager
         mViewPager.adapter =  object : FragmentStatePagerAdapter(supportFragmentManager) {
